@@ -792,17 +792,41 @@ const ProblemPage = () => {
             {(verdict || output) && (
               <>
                 {/* Enhanced Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
-                  <h3 className="text-sm font-medium text-blue-300 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
-                    Results
-                  </h3>
-                  <div className="flex gap-4 text-xs text-gray-400">
-                    {executionTime !== null && <span>Time: {Math.ceil(executionTime)} ms</span>}
-                    {memoryUsage !== null && <span>Memory: {memoryUsage} MB</span>}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 p-3 bg-slate-900/50 border border-slate-700/50 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <h3 className="text-sm font-semibold text-slate-200 tracking-wide">
+                      Execution Results
+                    </h3>
+                  </div>
+                  <div className="hidden sm:block w-px h-4 bg-slate-600"></div>
+                </div>
+                
+                  <div className="flex items-center gap-6 mt-2 sm:mt-0">
+                    {executionTime !== null && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-500/10 to-blue-600/10 border border-blue-500/20 rounded-md">
+                        <svg className="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-xs font-medium text-blue-300">
+                          Runtime: <span className="text-blue-100 font-semibold">{Math.ceil(executionTime)}ms</span>
+                        </span>
+                      </div>
+                    )}
+                    
+                    {memoryUsage !== null && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-md">
+                        <svg className="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                        </svg>
+                        <span className="text-xs font-medium text-purple-300">
+                          Memory: <span className="text-purple-100 font-semibold">{memoryUsage}MB</span>
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
-
                 {/* Enhanced Verdict box */}
                 <div
                   className={`p-4 rounded-lg text-sm border backdrop-blur-sm transition-all duration-300 ${
