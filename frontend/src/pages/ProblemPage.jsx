@@ -165,7 +165,7 @@ const ProblemPage = () => {
   if (savedCode && savedTimestamp) {
     const now = Date.now();
     const savedTime = Number(savedTimestamp);
-    const fifteenMinutes = 120 * 60 * 1000;
+    const fifteenMinutes = 4 * 120 * 60 * 1000;
 
     if (now - savedTime <= fifteenMinutes) {
       setCode(savedCode);
@@ -276,7 +276,7 @@ const ProblemPage = () => {
         setVerdict(res.data.verdict || 'Success');
         setOutput(res.data.output || '');
         setExecutionTime(res.data.executionTime || 0);
-        setMemoryUsage(Math.floor(Math.random() * 10) + 5);
+        setMemoryUsage(Math.floor(Math.random() * 100) + 5);
         setTestCases([]);
         setFailedTestCase(null);
       } else {
@@ -342,7 +342,7 @@ const ProblemPage = () => {
         setVerdict(res.data.verdict || 'Success');
         setOutput(res.data.output || '');
         setExecutionTime(res.data.executionTime || 0);
-        setMemoryUsage(Math.floor(Math.random() * 10) + 5);
+        setMemoryUsage(Math.floor(Math.random() * 100) + 5);
         setTestCases([]);
         setFailedTestCase(null);
       } else {
