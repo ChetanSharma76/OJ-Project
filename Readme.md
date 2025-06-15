@@ -8,7 +8,7 @@ THE OPTICODE is a full-stack **Online Judge system** that allows users to solve 
 
 ## 🌐 Live Demo
 
-- 🔗 Frontend (Vercel): [(https://opticodeoj.vercel.app)]https://opticodeoj.vercel.app
+- 🔗 Frontend (Vercel): [https://opticodeoj.vercel.app](https://opticodeoj.vercel.app)
 - 🔗 Backend (AWS): [https://backend.theoj.xyz](https://backend.theoj.xyz)
 
 ---
