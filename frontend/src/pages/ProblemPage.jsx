@@ -1131,7 +1131,7 @@ const ProblemPage = () => {
                     <div className="flex items-center gap-4">
                       {aiReviewCount !== undefined && (
                         <span className="inline-block bg-purple-600/80 text-purple-100 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border border-purple-500/30">
-                          {aiReviewCount}/4 Used
+                          {aiReviewCount}/5 Used
                         </span>
                       )}
                       {/* Chevron Icon for dropdown */}
