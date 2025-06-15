@@ -902,21 +902,47 @@ const ProblemPage = () => {
             {/* Enhanced AI Review Section */}
             {showAIReview && aiReviewResponse && aiReviewResponse.trim().length > 0 && (
               <>
-                <div className="flex items-center justify-between text-sm font-medium mb-6 mt-8 text-slate-200 border-b border-slate-600/30 pb-3">
+                {/* Header: Now clickable with an icon */}
+                <div
+                  className="flex items-center justify-between text-sm font-medium mb-3 mt-8 text-slate-200 border-b border-slate-600/30 pb-3 cursor-pointer select-none"
+                  onClick={() => setIsAiReviewOpen(!isAiReviewOpen)}
+                >
                   <h3 className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
                     AI Review
                   </h3>
-                  {aiReviewCount !== undefined && (
-                    <span className="inline-block bg-purple-600/80 text-purple-100 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border border-purple-500/30">
-                      {aiReviewCount}/2 Used
-                    </span>
-                  )}
+                  <div className="flex items-center gap-4">
+                    {aiReviewCount !== undefined && (
+                      <span className="inline-block bg-purple-600/80 text-purple-100 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border border-purple-500/30">
+                        {aiReviewCount}/2 Used
+                      </span>
+                    )}
+                    {/* Chevron Icon for dropdown */}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2.5}
+                      stroke="currentColor"
+                      className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${
+                        isAiReviewOpen ? "rotate-180" : ""
+                      }`}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                    </svg>
+                  </div>
                 </div>
-                <div className="mt-5 bg-gradient-to-br from-slate-900/80 to-slate-800/80 text-slate-100 rounded-xl p-6 overflow-y-auto resize-y max-h-[60vh] min-h-[250px] text-sm space-y-6 leading-relaxed shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-                  <ReactMarkdown
-                    children={aiReviewResponse}
-                    remarkPlugins={[remarkGfm]}
+                <div
+                  className={`grid overflow-hidden transition-all duration-500 ease-in-out ${
+                    isAiReviewOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    {/* Your original content div is preserved inside the wrapper */}
+                    <div className="mt-5 bg-gradient-to-br from-slate-900/80 to-slate-800/80 text-slate-100 rounded-xl p-6 overflow-y-auto resize-y max-h-[60vh] min-h-[250px] text-sm space-y-6 leading-relaxed shadow-2xl border border-slate-700/50 backdrop-blur-sm">
+                      <ReactMarkdown
+                        children={aiReviewResponse}
+                        remarkPlugins={[remarkGfm]}
                     components={{
                       code({ node, inline, className, children, ...props }) {
                         const match = /language-(\w+)/.exec(className || '');
@@ -1157,6 +1183,8 @@ const ProblemPage = () => {
                       },
                     }}
                   />
+                </div>
+                </div>
                 </div>
               </>
             )}
