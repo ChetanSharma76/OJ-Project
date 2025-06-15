@@ -52,6 +52,7 @@ const ProblemPage = () => {
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState("vs-dark");
   const [isAiReviewOpen, setIsAiReviewOpen] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // FIX: Add window size tracking for responsive behavior
   const [windowSize, setWindowSize] = useState({
@@ -166,69 +167,68 @@ const ProblemPage = () => {
     setIsDragging(true);
   };
 
-  useEffect(() => {
-    const savedCode = localStorage.getItem(`code-${problemId}`);
-    const savedTimestamp = localStorage.getItem(`code-timestamp-${problemId}`);
-
-    if (savedCode && savedTimestamp) {
-      const now = Date.now();
-      const savedTime = Number(savedTimestamp);
-      const fifteenMinutes = 4 * 120 * 60 * 1000;
-
-      if (now - savedTime <= fifteenMinutes) {
-        setCode(savedCode);
-      } else {
-        localStorage.removeItem(`code-${problemId}`);
-        localStorage.removeItem(`code-timestamp-${problemId}`);
-      }
+// 1. Load data when component mounts and user data is available
+useEffect(() => {
+  if (token && userData?._id) {
+    const userKey = userData._id;
+    
+    // Load code
+    const savedCode = localStorage.getItem(`code-${problemId}-${userKey}`);
+    if (savedCode) {
+      setCode(savedCode);
     }
-
-    const savedLanguage = localStorage.getItem(`language-${problemId}`);
-
-    // FIX: Global daily reset logic for AI review count (not per problem)
-    const savedReviewCount = localStorage.getItem(`aiReviewCount-global`);
-    const lastReviewDate = localStorage.getItem(`aiReviewLastDate-global`);
-
-    const today = new Date();
-    const todayDateString = today.toISOString().split("T")[0]; // YYYY-MM-DD format
-
-    if (lastReviewDate) {
-      // Check if it's a new day
-      if (lastReviewDate !== todayDateString) {
-        // Reset count for new day
-        localStorage.setItem(`aiReviewCount-global`, "0");
-        localStorage.setItem(`aiReviewLastDate-global`, todayDateString);
-        setAiReviewCount(0);
-      } else {
-        // Same day, use saved count
-        if (savedReviewCount) {
-          setAiReviewCount(Number(savedReviewCount));
-        } else {
-          setAiReviewCount(0);
-        }
-      }
-    } else {
-      // First time, set today's date and reset count
-      localStorage.setItem(`aiReviewLastDate-global`, todayDateString);
-      localStorage.setItem(`aiReviewCount-global`, "0");
-      setAiReviewCount(0);
+    
+    // Load language
+    const savedLanguage = localStorage.getItem(`language-${problemId}-${userKey}`);
+    if (savedLanguage) {
+      setLanguage(savedLanguage);
     }
+    
+    // Load AI review
+    const savedAiReview = localStorage.getItem(`aiReview-${problemId}-${userKey}`);
+    if (savedAiReview) {
+      setAiReviewResponse(savedAiReview);
+    }
+    
+    // Load AI review count
+    const savedCount = localStorage.getItem(`aiReviewCount-${userKey}`);
+    if (savedCount) {
+      setAiReviewCount(Number(savedCount));
+    }
+  }
+}, [token, userData?._id, problemId]);
 
-    if (savedLanguage) setLanguage(savedLanguage);
-  }, [problemId]);
+// 2. Clear data when no token
+useEffect(() => {
+  if (!token) {
+    setCode("//Write your code here...");
+    setLanguage("cpp");
+    setAiReviewResponse("");
+    setAiReviewCount(0);
+    
+    // Clear localStorage
+    Object.keys(localStorage).forEach(key => {
+      if (key.includes('code-') || key.includes('language-') || key.includes('aiReview-')) {
+        localStorage.removeItem(key);
+      }
+    });
+  }
+}, [token]);
 
-  useEffect(() => {
-    localStorage.setItem(`code-${problemId}`, code);
-    localStorage.setItem(`code-timestamp-${problemId}`, Date.now().toString());
-  }, [code, problemId]);
+// 3. Save code when it changes
+useEffect(() => {
+  if (token && userData?._id && code !== "//Write your code here...") {
+    localStorage.setItem(`code-${problemId}-${userData._id}`, code);
+  }
+}, [code, token, userData?._id, problemId]);
 
-  useEffect(() => {
-    localStorage.setItem(`language-${problemId}`, language);
-  }, [language, problemId]);
+// 4. Save language when it changes
+useEffect(() => {
+  if (token && userData?._id) {
+    localStorage.setItem(`language-${problemId}-${userData._id}`, language);
+  }
+}, [language, token, userData?._id, problemId]);
 
-  useEffect(() => {
-    localStorage.setItem(`aiReviewCount-global`, aiReviewCount.toString());
-  }, [aiReviewCount]);
 
   useEffect(() => {
     try {
@@ -402,42 +402,41 @@ const ProblemPage = () => {
   };
 
   const handleAIReview = async () => {
-    if (aiReviewCount >= 4) {
-      setShowPlanPopup(true);
-      return;
-    }
-    setIsReviewing(true);
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/ai/review`,
-        {
-          code,
-          language,
-          problemId,
-          username: userData?.username,
-        },
-        {
-          headers: { token },
-        }
-      );
-      const newCount = aiReviewCount + 1;
-      setAiReviewCount(newCount);
-      setAiReviewResponse(res.data.review || "No response received.");
+  if (aiReviewCount >= 4) {
+    setShowPlanPopup(true);
+    return;
+  }
+  setIsReviewing(true);
+  try {
+    const res = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/api/ai/review`,
+      {
+        code,
+        language,
+        problemId,
+        username: userData?.username,
+      },
+      {
+        headers: { token },
+      }
+    );
+    
+    const newCount = aiReviewCount + 1;
+    setAiReviewCount(newCount);
+    setAiReviewResponse(res.data.review || "No response received.");
 
-      // Store globally, not per problem
-      localStorage.setItem(`aiReviewCount-global`, newCount.toString());
-      localStorage.setItem(
-        `aiReviewLastDate-global`,
-        new Date().toISOString().split("T")[0]
-      );
+    // Save to localStorage
+    localStorage.setItem(`aiReviewCount-${userData._id}`, newCount.toString());
+    localStorage.setItem(`aiReview-${problemId}-${userData._id}`, res.data.review || "No response received.");
 
-      toast.success("AI Review fetched successfully");
-    } catch (error) {
-      toast.error(error?.response?.data?.error || "AI Review failed");
-    } finally {
-      setIsReviewing(false);
-    }
-  };
+    toast.success("AI Review fetched successfully");
+  } catch (error) {
+    toast.error(error?.response?.data?.error || "AI Review failed");
+  } finally {
+    setIsReviewing(false);
+  }
+};
+
 
   // Enhanced loading screen
   if (loading) {
@@ -1131,7 +1130,7 @@ const ProblemPage = () => {
                     <div className="flex items-center gap-4">
                       {aiReviewCount !== undefined && (
                         <span className="inline-block bg-purple-600/80 text-purple-100 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border border-purple-500/30">
-                          {aiReviewCount}/5 Used
+                          {aiReviewCount}/4 Used
                         </span>
                       )}
                       {/* Chevron Icon for dropdown */}
